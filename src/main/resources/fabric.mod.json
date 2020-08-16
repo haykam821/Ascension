@@ -1,0 +1,24 @@
+{
+	"schemaVersion": 1,
+	"id": "ascension",
+	"version": "${version}",
+	"name": "Ascension",
+	"description": "A tower climbing minigame for Minecraft.",
+	"authors": [
+		"haykam821"
+	],
+	"contact": {
+		"homepage": "https://github.com/haykam821/Ascension#readme",
+		"issues": "https://github.com/haykam821/Ascension/issues"
+	},
+	"entrypoints": {
+		"main": [
+			"io.github.haykam821.ascension.Main"
+		]
+	},
+	"license": "MIT",
+	"icon": "assets/ascension/icon.png",
+	"depends": {
+		"fabricloader": ">=0.4.0"
+	}
+}

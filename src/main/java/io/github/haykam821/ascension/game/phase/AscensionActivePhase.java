@@ -1,0 +1,142 @@
+package io.github.haykam821.ascension.game.phase;
+
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.Set;
+
+import io.github.haykam821.ascension.game.AscensionConfig;
+import io.github.haykam821.ascension.game.map.AscensionMap;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.GameMode;
+import xyz.nucleoid.plasmid.game.Game;
+import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.event.GameOpenListener;
+import xyz.nucleoid.plasmid.game.event.GameTickListener;
+import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
+import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
+import xyz.nucleoid.plasmid.game.rule.GameRule;
+import xyz.nucleoid.plasmid.game.rule.RuleResult;
+
+public class AscensionActivePhase {
+	private static final DecimalFormat FORMAT = new DecimalFormat("0.##");
+
+	private final GameWorld gameWorld;
+	private final ServerWorld world;
+	private final AscensionMap map;
+	private final AscensionConfig config;
+	private final Set<ServerPlayerEntity> players;
+	private int ticksElapsed = 0;
+
+	public AscensionActivePhase(GameWorld gameWorld, AscensionMap map, AscensionConfig config, Set<ServerPlayerEntity> players) {
+		this.gameWorld = gameWorld;
+		this.world = gameWorld.getWorld();
+		this.map = map;
+		this.config = config;
+		this.players = players;
+	}
+
+	public static void setRules(Game game) {
+		game.setRule(GameRule.CRAFTING, RuleResult.DENY);
+		game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
+		game.setRule(GameRule.HUNGER, RuleResult.DENY);
+		game.setRule(GameRule.PORTALS, RuleResult.DENY);
+		game.setRule(GameRule.PVP, RuleResult.DENY);
+	}
+
+	public static void open(GameWorld gameWorld, AscensionMap map, AscensionConfig config) {
+		AscensionActivePhase phase = new AscensionActivePhase(gameWorld, map, config, gameWorld.getPlayers());
+
+		gameWorld.openGame(game -> {
+			AscensionActivePhase.setRules(game);
+
+			// Listeners
+			game.on(GameOpenListener.EVENT, phase::open);
+			game.on(GameTickListener.EVENT, phase::tick);
+			game.on(PlayerAddListener.EVENT, phase::addPlayer);
+			game.on(PlayerDeathListener.EVENT, phase::onPlayerDeath);
+		});
+	}
+
+	public void open() {
+ 		for (ServerPlayerEntity player : this.players) {
+			player.setGameMode(GameMode.ADVENTURE);
+		
+			StatusEffectInstance jumpBoost = new StatusEffectInstance(StatusEffects.JUMP_BOOST, 20000000, this.config.getJumpBoostAmplifier(), true, false, false);
+			player.applyStatusEffect(jumpBoost);
+		
+			AscensionActivePhase.spawn(this.world, this.map, player);
+		}
+	}
+
+	private int getEndY() {
+		return this.map.getBounds().getMax().getY();
+	}
+
+	private boolean isFinished(ServerPlayerEntity player) {
+		return player.getY() > this.getEndY();
+	}
+
+	private Text getWinMessage(ServerPlayerEntity player) {
+		String time = AscensionActivePhase.FORMAT.format(this.ticksElapsed / (double) 20);
+		return player.getDisplayName().shallowCopy().append(" has won the game in " + time + " seconds!").formatted(Formatting.GOLD);
+	}
+
+	private void tick() {
+		for (ServerPlayerEntity player : this.players) {
+			if (this.isFinished(player)) {
+				// Send win message
+				Text message = this.getWinMessage(player);
+				for (ServerPlayerEntity messagedPlayer : this.players) {
+					messagedPlayer.sendMessage(message, false);
+				}
+
+				this.gameWorld.close();
+				return;
+			}
+
+			player.experienceProgress = (float) MathHelper.clamp(player.getY() / this.getEndY(), 0, 1);
+			player.setExperienceLevel((int) Math.max(0, this.getEndY() - player.getY()));
+		}
+
+		this.ticksElapsed += 1;
+	}
+
+	private void setSpectator(PlayerEntity player) {
+		player.setGameMode(GameMode.SPECTATOR);
+	}
+
+	private void addPlayer(PlayerEntity player) {
+		if (!this.players.contains(player)) {
+			this.setSpectator(player);
+		}
+	}
+
+	private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
+		AscensionActivePhase.spawn(this.world, this.map, player);
+		return ActionResult.SUCCESS;
+	}
+
+	public static void spawn(ServerWorld world, AscensionMap map, ServerPlayerEntity player) {
+		BlockPos min = map.getBounds().getMin();
+		BlockPos max = map.getBounds().getMax();
+
+		int x = world.getRandom().nextInt(max.getX() - min.getX()) + min.getX();
+		int z = world.getRandom().nextInt(max.getZ() - min.getZ()) + min.getZ();
+
+		player.teleport(world, x, 1, z, 0, 0);
+	}
+
+	static {
+		FORMAT.setRoundingMode(RoundingMode.DOWN);
+	}
+}
