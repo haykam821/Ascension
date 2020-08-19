@@ -96,9 +96,7 @@ public class AscensionActivePhase {
 			if (this.isFinished(player)) {
 				// Send win message
 				Text message = this.getWinMessage(player);
-				for (ServerPlayerEntity messagedPlayer : this.players) {
-					messagedPlayer.sendMessage(message, false);
-				}
+				this.gameWorld.getPlayerSet().sendMessage(message);
 
 				this.gameWorld.close();
 				return;
