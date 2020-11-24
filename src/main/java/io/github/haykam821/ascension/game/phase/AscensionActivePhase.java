@@ -1,9 +1,6 @@
 package io.github.haykam821.ascension.game.phase;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.Set;
-
+import com.google.common.collect.Sets;
 import io.github.haykam821.ascension.game.AscensionConfig;
 import io.github.haykam821.ascension.game.map.AscensionMap;
 import net.minecraft.entity.damage.DamageSource;
@@ -18,8 +15,8 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
-import xyz.nucleoid.plasmid.game.Game;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameLogic;
+import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.event.GameOpenListener;
 import xyz.nucleoid.plasmid.game.event.GameTickListener;
 import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
@@ -27,25 +24,29 @@ import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.Set;
+
 public class AscensionActivePhase {
 	private static final DecimalFormat FORMAT = new DecimalFormat("0.##");
 
-	private final GameWorld gameWorld;
+	private final GameSpace gameSpace;
 	private final ServerWorld world;
 	private final AscensionMap map;
 	private final AscensionConfig config;
 	private final Set<ServerPlayerEntity> players;
 	private int ticksElapsed = 0;
 
-	public AscensionActivePhase(GameWorld gameWorld, AscensionMap map, AscensionConfig config, Set<ServerPlayerEntity> players) {
-		this.gameWorld = gameWorld;
-		this.world = gameWorld.getWorld();
+	public AscensionActivePhase(GameSpace gameSpace, AscensionMap map, AscensionConfig config, Set<ServerPlayerEntity> players) {
+		this.gameSpace = gameSpace;
+		this.world = gameSpace.getWorld();
 		this.map = map;
 		this.config = config;
 		this.players = players;
 	}
 
-	public static void setRules(Game game) {
+	public static void setRules(GameLogic game) {
 		game.setRule(GameRule.CRAFTING, RuleResult.DENY);
 		game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
 		game.setRule(GameRule.HUNGER, RuleResult.DENY);
@@ -53,10 +54,10 @@ public class AscensionActivePhase {
 		game.setRule(GameRule.PVP, RuleResult.DENY);
 	}
 
-	public static void open(GameWorld gameWorld, AscensionMap map, AscensionConfig config) {
-		AscensionActivePhase phase = new AscensionActivePhase(gameWorld, map, config, gameWorld.getPlayers());
+	public static void open(GameSpace gameSpace, AscensionMap map, AscensionConfig config) {
+		AscensionActivePhase phase = new AscensionActivePhase(gameSpace, map, config, Sets.newHashSet(gameSpace.getPlayers()));
 
-		gameWorld.openGame(game -> {
+		gameSpace.openGame(game -> {
 			AscensionActivePhase.setRules(game);
 
 			// Listeners
@@ -96,9 +97,9 @@ public class AscensionActivePhase {
 			if (this.isFinished(player)) {
 				// Send win message
 				Text message = this.getWinMessage(player);
-				this.gameWorld.getPlayerSet().sendMessage(message);
+				this.gameSpace.getPlayers().sendMessage(message);
 
-				this.gameWorld.close();
+				this.gameSpace.close();
 				return;
 			}
 

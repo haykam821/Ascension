@@ -1,5 +1,6 @@
 {
 	"type": "ascension:ascension",
+	"name": "Ascension",
 	"map": {
 		"x": 36,
 		"z": 36,
