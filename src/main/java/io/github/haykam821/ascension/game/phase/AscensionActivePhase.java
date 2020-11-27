@@ -1,6 +1,11 @@
 package io.github.haykam821.ascension.game.phase;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.Set;
+
 import com.google.common.collect.Sets;
+
 import io.github.haykam821.ascension.game.AscensionConfig;
 import io.github.haykam821.ascension.game.map.AscensionMap;
 import net.minecraft.entity.damage.DamageSource;
@@ -23,10 +28,6 @@ import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
 import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
-
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.Set;
 
 public class AscensionActivePhase {
 	private static final DecimalFormat FORMAT = new DecimalFormat("0.##");
@@ -93,6 +94,8 @@ public class AscensionActivePhase {
 	}
 
 	private void tick() {
+		int minY = this.map.getBounds().getMin().getY();
+
 		for (ServerPlayerEntity player : this.players) {
 			if (this.isFinished(player)) {
 				// Send win message
@@ -101,6 +104,10 @@ public class AscensionActivePhase {
 
 				this.gameSpace.close();
 				return;
+			}
+			
+			if (player.getY() < minY) {
+				AscensionActivePhase.spawn(this.world, this.map, player);
 			}
 
 			player.experienceProgress = (float) MathHelper.clamp(player.getY() / this.getEndY(), 0, 1);

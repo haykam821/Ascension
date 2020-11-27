@@ -14,6 +14,7 @@ import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.GameWaitingLobby;
 import xyz.nucleoid.plasmid.game.StartResult;
 import xyz.nucleoid.plasmid.game.config.PlayerConfig;
+import xyz.nucleoid.plasmid.game.event.GameTickListener;
 import xyz.nucleoid.plasmid.game.event.OfferPlayerListener;
 import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
 import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
@@ -47,11 +48,21 @@ public class AscensionWaitingPhase {
 			AscensionActivePhase.setRules(game);
 
 			// Listeners
+			game.on(GameTickListener.EVENT, phase::tick);
 			game.on(PlayerAddListener.EVENT, phase::addPlayer);
 			game.on(PlayerDeathListener.EVENT, phase::onPlayerDeath);
 			game.on(OfferPlayerListener.EVENT, phase::offerPlayer);
 			game.on(RequestStartListener.EVENT, phase::requestStart);
 		});
+	}
+
+	private void tick() {
+		int minY = map.getBounds().getMin().getY();
+		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
+			if (player.getY() < minY) {
+				AscensionActivePhase.spawn(this.gameSpace.getWorld(), map, player);
+			}
+		}
 	}
 
 	private boolean isFull() {
@@ -79,6 +90,6 @@ public class AscensionWaitingPhase {
 	public ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		// Respawn player at the start
 		AscensionActivePhase.spawn(this.gameSpace.getWorld(), this.map, player);
-		return ActionResult.SUCCESS;
+		return ActionResult.FAIL;
 	}
 }
