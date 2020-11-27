@@ -14,7 +14,7 @@ public class AscensionMapConfig {
 			Codec.INT.fieldOf("z").forGetter(AscensionMapConfig::getZ),
 			Codec.INT.fieldOf("layers").forGetter(AscensionMapConfig::getLayers),
 			Codec.INT.fieldOf("layer_spacing").forGetter(AscensionMapConfig::getLayerSpacing),
-			BlockStateProvider.CODEC.optionalFieldOf("floor_provider", new SimpleBlockStateProvider(Blocks.SMOOTH_QUARTZ.getDefaultState())).forGetter(AscensionMapConfig::getFloorProvider)
+			BlockStateProvider.TYPE_CODEC.optionalFieldOf("floor_provider", new SimpleBlockStateProvider(Blocks.SMOOTH_QUARTZ.getDefaultState())).forGetter(AscensionMapConfig::getFloorProvider)
 		).apply(instance, AscensionMapConfig::new);
 	});
 
