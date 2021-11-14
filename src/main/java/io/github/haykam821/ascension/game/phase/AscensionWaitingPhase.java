@@ -41,18 +41,18 @@ public class AscensionWaitingPhase {
 			.setDefaultGameMode(GameMode.ADVENTURE);
 
 		return context.createOpenProcedure(worldConfig, game -> {
-			AscensionWaitingPhase phase = new AscensionWaitingPhase(game.getSpace(), map, context.getConfig());
+			AscensionWaitingPhase phase = new AscensionWaitingPhase(game.getGameSpace(), map, context.getConfig());
 
 			GameWaitingLobby.applyTo(game, context.getConfig().getPlayerConfig());
 
 			AscensionActivePhase.setRules(game);
 
 			// Listeners
-			game.on(GameTickListener.EVENT, phase::tick);
-			game.on(PlayerAddListener.EVENT, phase::addPlayer);
-			game.on(PlayerDeathListener.EVENT, phase::onPlayerDeath);
-			game.on(OfferPlayerListener.EVENT, phase::offerPlayer);
-			game.on(RequestStartListener.EVENT, phase::requestStart);
+			game.listen(GameTickListener.EVENT, phase::tick);
+			game.listen(PlayerAddListener.EVENT, phase::addPlayer);
+			game.listen(PlayerDeathListener.EVENT, phase::onPlayerDeath);
+			game.listen(OfferPlayerListener.EVENT, phase::offerPlayer);
+			game.listen(RequestStartListener.EVENT, phase::requestStart);
 		});
 	}
 

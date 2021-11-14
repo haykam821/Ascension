@@ -28,7 +28,6 @@ import xyz.nucleoid.plasmid.game.event.GameTickListener;
 import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
 import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
-import xyz.nucleoid.plasmid.game.rule.RuleResult;
 
 public class AscensionActivePhase {
 	private static final DecimalFormat FORMAT = new DecimalFormat("0.##");
@@ -49,11 +48,11 @@ public class AscensionActivePhase {
 	}
 
 	public static void setRules(GameLogic game) {
-		game.setRule(GameRule.CRAFTING, RuleResult.DENY);
-		game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
-		game.setRule(GameRule.HUNGER, RuleResult.DENY);
-		game.setRule(GameRule.PORTALS, RuleResult.DENY);
-		game.setRule(GameRule.PVP, RuleResult.DENY);
+		game.deny(GameRule.CRAFTING);
+		game.deny(GameRule.FALL_DAMAGE);
+		game.deny(GameRule.HUNGER);
+		game.deny(GameRule.PORTALS);
+		game.deny(GameRule.PVP);
 	}
 
 	public static void open(GameSpace gameSpace, AscensionMap map, AscensionConfig config) {
@@ -63,10 +62,10 @@ public class AscensionActivePhase {
 			AscensionActivePhase.setRules(game);
 
 			// Listeners
-			game.on(GameOpenListener.EVENT, phase::open);
-			game.on(GameTickListener.EVENT, phase::tick);
-			game.on(PlayerAddListener.EVENT, phase::addPlayer);
-			game.on(PlayerDeathListener.EVENT, phase::onPlayerDeath);
+			game.listen(GameOpenListener.EVENT, phase::open);
+			game.listen(GameTickListener.EVENT, phase::tick);
+			game.listen(PlayerAddListener.EVENT, phase::addPlayer);
+			game.listen(PlayerDeathListener.EVENT, phase::onPlayerDeath);
 		});
 	}
 
