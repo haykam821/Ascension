@@ -1,14 +1,14 @@
 package io.github.haykam821.ascension.game.map;
 
+import java.util.Random;
+
 import io.github.haykam821.ascension.game.AscensionConfig;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
-import xyz.nucleoid.plasmid.map.template.MapTemplate;
-import xyz.nucleoid.plasmid.util.BlockBounds;
-
-import java.util.Random;
+import xyz.nucleoid.map_templates.BlockBounds;
+import xyz.nucleoid.map_templates.MapTemplate;
 
 public class AscensionMapBuilder {
 	private static final BlockState AIR_STATE = Blocks.AIR.getDefaultState();
@@ -24,7 +24,7 @@ public class AscensionMapBuilder {
 		AscensionMapConfig mapConfig = this.config.getMapConfig();
 
 		int y = ((mapConfig.getLayers() - 1) * mapConfig.getLayerSpacing()) + 1;
-		BlockBounds bounds = new BlockBounds(BlockPos.ORIGIN, new BlockPos(mapConfig.getX(), y, mapConfig.getZ()));
+		BlockBounds bounds = BlockBounds.of(BlockPos.ORIGIN, new BlockPos(mapConfig.getX(), y, mapConfig.getZ()));
 		this.build(bounds, template, mapConfig);
 
 		return new AscensionMap(template, bounds);
