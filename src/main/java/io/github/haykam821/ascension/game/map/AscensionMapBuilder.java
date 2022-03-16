@@ -3,10 +3,13 @@ package io.github.haykam821.ascension.game.map;
 import java.util.Random;
 
 import io.github.haykam821.ascension.game.AscensionConfig;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryEntry;
 import xyz.nucleoid.map_templates.BlockBounds;
 import xyz.nucleoid.map_templates.MapTemplate;
 
@@ -34,7 +37,11 @@ public class AscensionMapBuilder {
 		if (pos.getY() == 0) {
 			return this.config.getMapConfig().getFloorProvider().getBlockState(random, pos);
 		} else if (random.nextInt(12) == 0) {
-			return BlockTags.WOOL.getRandom(random).getDefaultState();
+			return Registry.BLOCK.getEntryList(BlockTags.WOOL)
+				.flatMap(wool -> wool.getRandom(random))
+				.map(RegistryEntry::value)
+				.map(Block::getDefaultState)
+				.orElse(AIR_STATE);
 		} else {
 			return AIR_STATE;
 		}
