@@ -92,7 +92,7 @@ public class AscensionActivePhase {
 
 	private Text getWinMessage(ServerPlayerEntity player) {
 		String time = AscensionActivePhase.FORMAT.format(this.ticksElapsed / (double) 20);
-		return player.getDisplayName().shallowCopy().append(" has won the game in " + time + " seconds!").formatted(Formatting.GOLD);
+		return player.getDisplayName().copy().append(" has won the game in " + time + " seconds!").formatted(Formatting.GOLD);
 	}
 
 	private void tick() {

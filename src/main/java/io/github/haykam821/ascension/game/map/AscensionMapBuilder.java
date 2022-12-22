@@ -1,13 +1,12 @@
 package io.github.haykam821.ascension.game.map;
 
-import java.util.Random;
-
 import io.github.haykam821.ascension.game.AscensionConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import xyz.nucleoid.map_templates.BlockBounds;
@@ -48,7 +47,7 @@ public class AscensionMapBuilder {
 	}
 
 	public void build(BlockBounds bounds, MapTemplate template, AscensionMapConfig mapConfig) {
-		Random random = new Random();
+		Random random = Random.createLocal();
 
 		for (BlockPos pos : bounds) {
 			if (pos.getY() % mapConfig.getLayerSpacing() == 0) {
