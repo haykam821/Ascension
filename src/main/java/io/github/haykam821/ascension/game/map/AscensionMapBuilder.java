@@ -1,15 +1,14 @@
 package io.github.haykam821.ascension.game.map;
 
-import java.util.Random;
-
 import io.github.haykam821.ascension.game.AscensionConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.tag.BlockTags;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.util.math.random.Random;
 import xyz.nucleoid.map_templates.BlockBounds;
 import xyz.nucleoid.map_templates.MapTemplate;
 
@@ -35,9 +34,9 @@ public class AscensionMapBuilder {
 
 	private BlockState getBlockState(BlockPos pos, Random random) {
 		if (pos.getY() == 0) {
-			return this.config.getMapConfig().getFloorProvider().getBlockState(random, pos);
+			return this.config.getMapConfig().getFloorProvider().get(random, pos);
 		} else if (random.nextInt(12) == 0) {
-			return Registry.BLOCK.getEntryList(BlockTags.WOOL)
+			return Registries.BLOCK.getEntryList(BlockTags.WOOL)
 				.flatMap(wool -> wool.getRandom(random))
 				.map(RegistryEntry::value)
 				.map(Block::getDefaultState)
@@ -48,7 +47,7 @@ public class AscensionMapBuilder {
 	}
 
 	public void build(BlockBounds bounds, MapTemplate template, AscensionMapConfig mapConfig) {
-		Random random = new Random();
+		Random random = Random.createLocal();
 
 		for (BlockPos pos : bounds) {
 			if (pos.getY() % mapConfig.getLayerSpacing() == 0) {
