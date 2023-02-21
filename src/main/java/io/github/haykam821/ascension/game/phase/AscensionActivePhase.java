@@ -39,6 +39,7 @@ public class AscensionActivePhase {
 	private final AscensionConfig config;
 	private final Set<ServerPlayerEntity> players;
 	private int ticksElapsed = 0;
+	private int ticksUntilClose = -1;
 
 	public AscensionActivePhase(GameSpace gameSpace, ServerWorld world, AscensionMap map, AscensionConfig config, Set<ServerPlayerEntity> players) {
 		this.gameSpace = gameSpace;
@@ -96,18 +97,29 @@ public class AscensionActivePhase {
 	}
 
 	private void tick() {
+		// Decrease ticks until game end to zero
+		if (this.isGameEnding()) {
+			if (this.ticksUntilClose == 0) {
+				this.gameSpace.close(GameCloseReason.FINISHED);
+			}
+
+			this.ticksUntilClose -= 1;
+		} else {
+			for (ServerPlayerEntity player : this.players) {
+				if (this.isFinished(player)) {
+					// Send win message
+					Text message = this.getWinMessage(player);
+					this.gameSpace.getPlayers().sendMessage(message);
+
+					this.ticksUntilClose = this.config.getTicksUntilClose().get(this.world.getRandom());
+					break;
+				}
+			}
+		}
+
 		int minY = this.map.getBounds().min().getY();
 
 		for (ServerPlayerEntity player : this.players) {
-			if (this.isFinished(player)) {
-				// Send win message
-				Text message = this.getWinMessage(player);
-				this.gameSpace.getPlayers().sendMessage(message);
-
-				this.gameSpace.close(GameCloseReason.FINISHED);
-				return;
-			}
-			
 			if (player.getY() < minY) {
 				AscensionActivePhase.spawn(this.world, this.map, player);
 			}
@@ -117,6 +129,10 @@ public class AscensionActivePhase {
 		}
 
 		this.ticksElapsed += 1;
+	}
+
+	private boolean isGameEnding() {
+		return this.ticksUntilClose >= 0;
 	}
 
 	private void setSpectator(ServerPlayerEntity player) {
