@@ -76,7 +76,7 @@ public class AscensionActivePhase {
  		for (ServerPlayerEntity player : this.players) {
 			player.changeGameMode(GameMode.ADVENTURE);
 		
-			StatusEffectInstance jumpBoost = new StatusEffectInstance(StatusEffects.JUMP_BOOST, 20000000, this.config.getJumpBoostAmplifier(), true, false, false);
+			StatusEffectInstance jumpBoost = new StatusEffectInstance(StatusEffects.JUMP_BOOST, StatusEffectInstance.INFINITE, this.config.getJumpBoostAmplifier(), true, false, false);
 			player.addStatusEffect(jumpBoost);
 		
 			AscensionActivePhase.spawn(this.world, this.map, player);
